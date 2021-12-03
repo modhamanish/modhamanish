@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="cs">
+	<head>
+		<meta charset="UTF-8">
+		<title>Daniel Duran - freelance webdeveloper</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+					<script>
+				WebFontConfig = {
+					google: {families: ['Dosis:300,400,500:latin-ext']},
+					active: function() { document.cookie ='webFont=1; expires='+(new Date(new Date().getTime() + 86400000)).toGMTString()+'; path=/' }
+				};
+				(function(d) {
+					var wf = d.createElement('script'), s = d.scripts[0];
+					wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js';
+					wf.async = true;
+					s.parentNode.insertBefore(wf, s);
+				})(document);
+			</script>	
+			<!--<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js" async defer></script>-->
+			<link href="https://fonts.googleapis.com/css?family=Dosis:300,400,500&amp;subset=latin-ext&amp;loc=1" rel="prefetch">
+				<link href="/assets/css/main.css?6" rel="stylesheet" type="text/css" />
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-90011162-1', 'auto');
+		ga('send', 'pageview');
+		</script>
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+		<link rel="manifest" href="/site.webmanifest">
+		<meta name="msapplication-TileColor" content="#da532c">
+		<meta name="theme-color" content="#ffffff">
+	</head>
+	<body>
+		<div id="app" class="app">
+			<div class="app-root" v-bind:class="{'has-detail': isDetail, 'tiles-hidden': !areTilesVisible}">
+				<div class="tiles">
+					<div class="tile theme-green">
+						<img src="/assets/img/dd.jpg" class="tile-img" alt="Daniel Duran" />
+						<div class="tile-text">
+							<h1 class="tile-title tile-title-lg">daniel duran</h1>
+							<p class="tile-caption">freelance webdeveloper</p>
+						</div>
+					</div>
+					<div class="tile theme-violet pointer" v-on:click="goTo('/reference')">
+						<h2 class="tile-title">reference</h2>
+						<div class="tile-text">
+							<p>biocev, bbop, nanovo, sculptureline, pears health cyber, pilotmedia, softreal, světozor-aero-biooko, <span class="nowrap">extend-it</span>, <span class="nowrap">s-power</span></p>
+						</div>
+						<span class="icon icon-tile-arrow">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+						</span>
+					</div>
+					<div class="tile theme-yellow pointer" v-on:click="goTo('/sluzby')">
+						<h2 class="tile-title">služby</h2>
+						<div class="tile-text">
+							<p>kódování webů, vývoj webových aplikací, html, css, php, javascript</p>
+						</div>
+						<span class="icon icon-tile-arrow">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+						</span>
+					</div>
+					<div class="tile theme-red pointer" v-on:click="goTo('/kontakt')">
+						<h2 class="tile-title">kontakt</h2>
+						<div class="tile-text">
+							<p>
+								<a href="tel:+420721652547">+420 721 652 547</a><br/>
+								<a href="mailto:info@danielduran.cz">info@danielduran.cz</a>
+							</p>
+						</div>
+						<span class="icon icon-tile-arrow">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+						</span>
+					</div>
+				</div>
+				<div id="detail" class="detail" v-bind:class="[isContentTransparent ? 'detail-content-transparent' : '' ,themeClass]">
+					<div class="navbar">
+						<div class="container">
+							<nav class="nav">
+								<ul>
+									<li>
+										<router-link to="/" exact>
+											<span>home</span>
+										</router-link>
+									</li>
+									<li>
+										<router-link to="/reference">
+											<span>reference</span>
+										</router-link>
+									</li>
+									<li>
+										<router-link to="/sluzby">
+											<span>služby</span>
+										</router-link>
+									</li>
+									<li>
+										<router-link to="/kontakt">
+											<span>kontakt</span>
+										</router-link>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</div>
+					<router-view></router-view>
+				</div>
+				<div class="hidden">
+					<div id="references">
+						<div class="container">
+							<h1 class="detail-title">reference</h1>
+							<div class="detail-section">
+								<div class="row">
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/biocev.png" alt="Biocev" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/bbop.png" alt="Bbop" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/sculptureline.png" alt="Sculptureline" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/nanovo.png" alt="Nanovo" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/pilotmedia.png" alt="Pilotmedia" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/svetozor.png" alt="Kino Světozor" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/softreal.png" alt="Softreal" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/aero.png" alt="Kino Aero" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/phc.png" alt="Pears Health Cyber" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/biooko.png" alt="Bio Oko" />
+											</div>
+										</div>
+									</div>
+									<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/extendit.png" alt="Extend IT" />
+											</div>
+										</div>
+									</div>
+																											<div class="col-xs-4 col-md-3 col-lg-2">
+										<div class="logo-container">
+											<div class="logo">
+												<img src="/assets/img/logos/spower.png" alt="S-Power" />
+											</div>
+										</div>
+									</div>
+																	</div>
+							</div>
+							<div class="detail-section projects">
+								<h2 class="detail-subtitle">vybrané projekty</h2>
+								<p class="detail-caption">výběr veřejných projektů, na kterých jsem pracoval/spolupracoval</p>
+								<div class="row">
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<img class="project-img" src="/assets/img/projects/biocev.png" alt="Bbop" />
+											<h3 class="project-title">Biocev</h3>
+											<p>
+												<a href="https://www.biocev.eu" class="link-with-icon" target="_blank">
+													www.biocev.eu
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Biotechnologické a biomedicínské centrum.</p>
+										</article>
+									</div>
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<img class="project-img" src="/assets/img/projects/bbop.png" alt="Bbop" />
+											<h3 class="project-title">Bbop</h3>
+											<p>
+												<a href="http://www.bbop.eu" class="link-with-icon" target="_blank">
+													www.bbop.eu
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Komunitní portál pro prodej hudebních nástrojů.</p>
+										</article>
+									</div>
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<img class="project-img" src="/assets/img/projects/nanovo.png" alt="Nanovo" />
+											<h3 class="project-title">Nanovo</h3>
+											<p>
+												<a href="http://www.nanovo.cz" class="link-with-icon" target="_blank">
+													www.nanovo.cz
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">E-shop s designovými doplňky a nábytkem.</p>
+										</article>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<img class="project-img" src="/assets/img/projects/sculptureline.png" alt="Sculpture line" />
+											<h3 class="project-title">Sculpture line</h3>
+											<p>
+												<a href="https://www.sculptureline.cz" class="link-with-icon" target="_blank">
+													www.sculptureline.cz
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Mezinárodní sochařský festival.</p>
+										</article>
+									</div>
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<img class="project-img" src="/assets/img/projects/zilmoc.png" alt="Sculpture line" />
+											<h3 class="project-title">4000slov</h3>
+											<p>
+												<a href="http://www.zilmoc.cz/" class="link-with-icon" target="_blank">
+													www.zilmoc.cz
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Webový přehrávač alba 4000slov.</p>
+										</article>
+									</div>
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<img class="project-img" src="/assets/img/projects/sterling.png" alt="Sterling" />
+											<h3 class="project-title">Sterling reality</h3>
+											<p>
+												<a href="http://www.sterlingreality.cz" class="link-with-icon" target="_blank">
+													www.sterlingreality.cz
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Realitní kancelář.</p>
+										</article>
+									</div>
+																	</div>
+								<div class="row">
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<h3 class="project-title">Alltraining</h3>
+											<p>
+												<a href="https://www.alltraining.cz" class="link-with-icon" target="_blank">
+													www.alltraining.cz
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Online tréninkový portál pro cyklisy.</p>
+										</article>
+									</div>
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<h3 class="project-title">Vzhůrudolů</h3>
+											<p>
+												<a href="http://www.vzhurudolu.cz" class="link-with-icon" target="_blank">
+													www.vzhurudolu.cz
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Webový frontend ze všech stran.</p>
+										</article>
+									</div>
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<h3 class="project-title">Softreal</h3>
+											<p>
+												<a href="http://www.softreal.cz" class="link-with-icon" target="_blank">
+													www.softreal.cz
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Pokročilý program pro realitní kanceláře.</p>
+										</article>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<h3 class="project-title">Filip Matějíček</h3>
+											<p>
+												<a href="http://www.filipmatejicek.info" class="link-with-icon" target="_blank">
+													www.filipmatejicek.info
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Font tester fontů Filipa Matějíčka.</p>
+										</article>
+									</div>
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<h3 class="project-title">Solaros</h3>
+											<p>
+												<a href="https://www.solaros.cz" class="link-with-icon" target="_blank">
+													www.solaros.cz
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Aplikace pro správu fotovoltaických elektráren.</p>
+										</article>
+									</div>
+									<div class="col-xs-12 col-sm-4">
+										<article class="project">
+											<h3 class="project-title">Land05</h3>
+											<p>
+												<a href="http://land05.cz" class="link-with-icon" target="_blank">
+													www.land05.cz
+													<span class="icon icon-link-outside">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.08 42.43"><title>arrow_2</title><polygon class="cls-1" fill="#fff" points="64.08 21.21 42.87 0 41.45 1.41 60.25 20.21 0 20.21 0 22.21 60.25 22.21 41.45 41.02 42.87 42.43 64.08 21.22 64.08 21.21 64.08 21.21"/></svg>
+													</span>
+												</a>
+											</p>
+											<p class="project-text">Ateliér zahradní a krajinářské architektury.</p>
+										</article>
+									</div>
+								</div>
+								<p class="text-center">...a mnoho dalších</p>
+							</div>
+						</div>
+					</div>
+					<div id="services">
+						<div class="container">
+							<h1 class="detail-title">služby</h1>
+							<div class="detail-section text-center">
+								<ul class="list-unstyled">
+									<li>návrh a vývoj webových aplikací na míru</li>
+									<li>kódování responsivních webů</li>
+									<li>údržby a úpravy existujících stránek</li>
+									<li>správa informačních systémů</li>
+									<li>konzultace</li>
+								</ul>
+							</div>
+							<div class="detail-section text-center">
+								<h3>webové technologie</h3>
+								<ul class="list-unstyled">
+									<li>PHP, MySQL, Apache, Nette</li>
+									<li>HTML5</li>
+									<li>CSS3</li>
+									<li>JavaScript, Vue.js</li>
+									<li>Elasticsearch</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div id="contact">
+						<div class="container text-center">
+							<h1 class="detail-title">kontakt</h1>
+							<div class="detail-section">
+								<p class="text-center detail-highlight">
+									<a href="tel:+420721652547">+420 721 652 547</a><br/>
+									<a href="mailto:info@danielduran.cz">info@danielduran.cz</a>
+								</p>
+							</div>
+							<div class="detail-section">
+								<h3>fakturační údaje</h3>							
+								Daniel Duran<br/>
+								Náměstí Vítězslava Hálka 97<br/>
+								250 70 Odolena Voda<br/>
+								IČ: 87987520
+							</div>
+							<div class="detail-section">
+								<h3>bankovní spojení</h3>							
+								246069497/0300
+							</div>
+							<div class="detail-section">
+								<h3>kancelář</h3>
+								Dolní náměstí 1<br/>
+								250 70 Odolena Voda<br/>
+							</div>
+							<div class="detail-section">
+								<h3>spolupráce</h3>
+								Jan Ledvinka - <a href="http://www.janledvinka.cz" target="_blank">www.janledvinka.cz</a><br/>
+								Tomáš Beran - <a href="https://www.pilotmedia.cz" target="_blank">www.pilotmedia.cz</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="/assets/js/all.js?2"></script>
+	</body>
+</html>
