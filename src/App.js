@@ -10,7 +10,7 @@ function App() {
         <header className="header">
           <div className="container-fluid-limited d-flex align-items-center justify-content-between">
             <a href="index.html" className="header-brand">
-              <img src="./assets/img/logo_b.svg" data-light-src="./assets/img/logo.svg" data-dark-src="./assets/img/logo_b.svg" alt="Your logo" />
+              <img src="/assets/img/logo_b.svg" data-light-src="/assets/img/logo.svg" data-dark-src="/assets/img/logo_b.svg" alt="Your logo" />
             </a>
             <button className="sections-nav-toggler" aria-label="Toggle navigation">
               <span className="sections-nav-toggler-bar"></span>
@@ -100,7 +100,7 @@ function App() {
                 <section id="section-01" className="section section-sub-header animation interaction-in">
                   <div className="section-body">
                     <div className="jumbotron jumbotron-fluid pt-6 pt-lg-8 pb-0 mb-0">
-                      <img src="./assets/img/avatar.jpg" className="jumbotron-img animation-translate animation-item-1" alt="Avatar" />
+                      <img src="/assets/img/avatar.jpg" className="jumbotron-img animation-translate animation-item-1" alt="Avatar" />
                       <h1 className="display-1 display-animated display-animated-in animation-translate animation-item-2">John<br />Wilson</h1>
                       <p className="lead animation-translate animation-item-3">FREELANCE WEBDEVELOPER</p>
                     </div>
