@@ -295,7 +295,19 @@
 
       if (hasVisibleStrip) {
         ctx.clip();
+
+        // Cinematic In-Animation: Scale down from 1.16 to 1.0, and move down into position
+        const inFactor = Math.max(0, 1 - pIn);
+        const imgScale = 1.0 + inFactor * 0.16;      // Initial scale ~1.16x -> smoothly decreases to 1.0x
+        const imgOffsetY = -inFactor * (22 * SCALE); // Starts -22px up -> smoothly glides down to 0px
+
+        ctx.save();
+        ctx.translate(CENTER, CENTER + imgOffsetY);
+        ctx.scale(imgScale, imgScale);
+        ctx.translate(-CENTER, -CENTER);
+
         drawImageCover(ctx, userImg, 0, 0, RENDER_SIZE, RENDER_SIZE);
+        ctx.restore();
       }
       ctx.restore();
     }
