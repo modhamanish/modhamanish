@@ -136,6 +136,7 @@
     <button class="tab-btn active" onclick="setStyle('blob', this)">Liquid Mask</button>
     <button class="tab-btn" onclick="setStyle('neon', this)">Neon Ring</button>
     <button class="tab-btn" onclick="setStyle('pulse', this)">Pulse Wave</button>
+    <button class="tab-btn" onclick="setStyle('slanted', this)">Slanted Slices</button>
   </div>
 
   <!-- 300x300 Display Box (Internally rendered at 3x 900x900 for Ultra-HD Crisp Edges) -->
@@ -184,12 +185,26 @@
     userImg.crossOrigin = 'anonymous';
     userImg.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&auto=format&fit=crop&q=95';
 
+    function updateStatusText() {
+      const statusText = document.getElementById('statusText');
+      if (currentStyle === 'blob') {
+        statusText.textContent = 'Size: 300x300 (1:1) | Border: Exact 4px | Loop Speed: 6s';
+      } else if (currentStyle === 'neon') {
+        statusText.textContent = 'Size: 300x300 (1:1) | Rotating Conic Glow | Loop Speed: 3s';
+      } else if (currentStyle === 'pulse') {
+        statusText.textContent = 'Size: 300x300 (1:1) | Double Wave & Float | Loop Speed: 3s';
+      } else if (currentStyle === 'slanted') {
+        statusText.textContent = 'Size: 300x300 (1:1) | 4 Slanted Strips | In-Grow Animation';
+      }
+    }
+
     window.setStyle = (style, btn) => {
       if (isExporting) return;
       currentStyle = style;
       animStartTime = performance.now();
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      updateStatusText();
     };
 
     document.getElementById('imageUpload').addEventListener('change', (e) => {
@@ -217,6 +232,72 @@
         u -= x / dx;
       }
       return 3 * (1 - u) * (1 - u) * u * y1 + 3 * (1 - u) * u * u * y2 + u * u * u;
+    }
+
+    // Smooth cubic-bezier(0.35, 0.0, 0.2, 1.0) for Slanted Strips In-Grow animation
+    function easeSlanted(p) {
+      if (p <= 0) return 0;
+      if (p >= 1) return 1;
+      const x1 = 0.35, y1 = 0.0, x2 = 0.2, y2 = 1.0;
+      let u = p;
+      for (let i = 0; i < 8; i++) {
+        const x = 3 * (1 - u) * (1 - u) * u * x1 + 3 * (1 - u) * u * u * x2 + u * u * u - p;
+        const dx = 3 * (1 - u) * (1 - u) * x1 + 6 * (1 - u) * u * (x2 - x1) + 3 * u * u * (1 - x2);
+        if (Math.abs(dx) < 1e-6) break;
+        u -= x / dx;
+      }
+      return 3 * (1 - u) * (1 - u) * u * y1 + 3 * (1 - u) * u * u * y2 + u * u * u;
+    }
+
+    // 4 Slanted strips matched 1:1 to reference paid animated profile and image:
+    // Slanted line equation: u = x + 0.5 * y  =>  x = u - 0.5 * y
+    // Exact 5px transparent gaps between strips
+    const SLANTED_STRIPS = [
+      { u_l: 117, u_r: 160, y_min: 61,  y_max: 199 },
+      { u_l: 165, u_r: 225, y_min: 26,  y_max: 298 },
+      { u_l: 230, u_r: 290, y_min: 1,   y_max: 265 },
+      { u_l: 295, u_r: 338, y_min: 127, y_max: 265 }
+    ];
+
+    function drawSlantedStrips(rawPIn, rawPOut) {
+      ctx.clearRect(0, 0, RENDER_SIZE, RENDER_SIZE);
+
+      const pIn = easeSlanted(rawPIn);
+      const pOut = easeSlanted(rawPOut);
+
+      ctx.save();
+      ctx.beginPath();
+      let hasVisibleStrip = false;
+
+      for (let i = 0; i < SLANTED_STRIPS.length; i++) {
+        const strip = SLANTED_STRIPS[i];
+        const yMin = strip.y_min * SCALE;
+        const yMax = strip.y_max * SCALE;
+        const totalH = yMax - yMin;
+
+        // In-grow: top edge grows upward from yMax to yMin
+        const currTop = yMax - pIn * totalH;
+        // Shrink-out: bottom edge shrinks upward from yMax to yMin
+        const currBottom = yMax - pOut * totalH;
+
+        if (currTop < currBottom) {
+          hasVisibleStrip = true;
+          const u1 = strip.u_l * SCALE;
+          const u2 = strip.u_r * SCALE;
+
+          ctx.moveTo(u1 - 0.5 * currTop, currTop);
+          ctx.lineTo(u2 - 0.5 * currTop, currTop);
+          ctx.lineTo(u2 - 0.5 * currBottom, currBottom);
+          ctx.lineTo(u1 - 0.5 * currBottom, currBottom);
+          ctx.closePath();
+        }
+      }
+
+      if (hasVisibleStrip) {
+        ctx.clip();
+        drawImageCover(ctx, userImg, 0, 0, RENDER_SIZE, RENDER_SIZE);
+      }
+      ctx.restore();
     }
 
     function lerp(a, b, m) {
@@ -412,14 +493,31 @@
         ctx.clip();
         drawImageCover(ctx, userImg, CENTER - innerR, CENTER + floatY - innerR, innerR * 2, innerR * 2);
         ctx.restore();
+
+      } else if (currentStyle === 'slanted') {
+        let pIn = 1, pOut = 0;
+        if (t < 0.22) {
+          pIn = t / 0.22;
+          pOut = 0;
+        } else if (t < 0.82) {
+          pIn = 1;
+          pOut = 0;
+        } else {
+          pIn = 1;
+          pOut = (t - 0.82) / 0.18;
+        }
+        drawSlantedStrips(pIn, pOut);
       }
     }
 
-    // Live Preview Loop: 6000ms (6s) for Liquid Mask, 3000ms (3s) for Neon/Pulse
+    // Live Preview Loop: 6000ms for Liquid Mask, 7000ms for Slanted Strips, 3000ms for Neon/Pulse
     function animatePreview(now) {
       if (!isExporting) {
         const elapsed = now - animStartTime;
-        const loopDuration = currentStyle === 'blob' ? 6000 : 3000;
+        let loopDuration = 3000;
+        if (currentStyle === 'blob') loopDuration = 6000;
+        else if (currentStyle === 'slanted') loopDuration = 7000;
+
         const t = (elapsed % loopDuration) / loopDuration;
         renderFrame(t);
       }
@@ -436,14 +534,48 @@
       const statusText = document.getElementById('statusText');
       exportBtn.disabled = true;
 
-      // Exact Real-Time Speed Calculation:
-      // delay = 40ms (25 FPS)
-      // Liquid Mask = 6000ms loop -> 6000 / 40 = 150 frames (150 * 40ms = 6.00 Seconds!)
-      // Neon/Pulse  = 3000ms loop -> 3000 / 40 = 75 frames  (75 * 40ms  = 3.00 Seconds!)
-      const loopDuration = currentStyle === 'blob' ? 6000 : 3000;
-      const delay = 40; // 40ms = 4 centiseconds in GIF89a spec (zero rounding error!)
-      const totalFrames = loopDuration / delay;
+      // Exact Real-Time Frame Schedule:
+      // Liquid Mask = 6000ms (150 frames @ 40ms)
+      // Neon / Pulse = 3000ms (75 frames @ 40ms)
+      // Slanted Strips = 1:1 Match with reference (38 in-grow @ 40ms + 1 hold @ 6000ms + 24 out @ 40ms = 63 frames)
+      const framesConfig = [];
+      if (currentStyle === 'slanted') {
+        const IN_FRAMES = 38;
+        const OUT_FRAMES = 24;
+        const HOLD_DELAY = 6000;
 
+        for (let i = 0; i < IN_FRAMES; i++) {
+          framesConfig.push({
+            pIn: i / (IN_FRAMES - 1),
+            pOut: 0,
+            delay: 40
+          });
+        }
+        framesConfig.push({
+          pIn: 1,
+          pOut: 0,
+          delay: HOLD_DELAY
+        });
+        for (let i = 0; i < OUT_FRAMES; i++) {
+          framesConfig.push({
+            pIn: 1,
+            pOut: (i + 1) / OUT_FRAMES,
+            delay: 40
+          });
+        }
+      } else {
+        const loopDuration = currentStyle === 'blob' ? 6000 : 3000;
+        const delay = 40;
+        const count = loopDuration / delay;
+        for (let i = 0; i < count; i++) {
+          framesConfig.push({
+            t: i / count,
+            delay: delay
+          });
+        }
+      }
+
+      const totalFrames = framesConfig.length;
       const gif = GIFEncoder();
 
       for (let i = 0; i < totalFrames; i++) {
@@ -452,8 +584,12 @@
           await new Promise(r => setTimeout(r, 8));
         }
 
-        const t = i / totalFrames;
-        renderFrame(t);
+        const cfg = framesConfig[i];
+        if (currentStyle === 'slanted') {
+          drawSlantedStrips(cfg.pIn, cfg.pOut);
+        } else {
+          renderFrame(cfg.t);
+        }
 
         // Downsample 900x900 -> 300x300
         exportCtx.clearRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
@@ -501,7 +637,7 @@
 
         gif.writeFrame(indexedFrame, EXPORT_SIZE, EXPORT_SIZE, {
           palette: fullPalette,
-          delay: delay,
+          delay: cfg.delay,
           transparent: true,
           transparentIndex: 0,
           dispose: 2
@@ -523,7 +659,7 @@
       isExporting = false;
       exportBtn.disabled = false;
       animStartTime = performance.now();
-      statusText.textContent = '✅ 300x300 HD GIF Exported (Exact 6s Speed & 4px Border)!';
+      statusText.textContent = `✅ 300x300 HD GIF Exported (${currentStyle.toUpperCase()})!`;
     });
   </script>
 </body>
