@@ -137,6 +137,7 @@
     <button class="tab-btn" onclick="setStyle('neon', this)">Neon Ring</button>
     <button class="tab-btn" onclick="setStyle('pulse', this)">Pulse Wave</button>
     <button class="tab-btn" onclick="setStyle('slanted', this)">Slanted Slices</button>
+    <button class="tab-btn" onclick="setStyle('ink', this)">Ink Bloom</button>
   </div>
 
   <!-- 300x300 Display Box (Internally rendered at 3x 900x900 for Ultra-HD Crisp Edges) -->
@@ -195,6 +196,8 @@
         statusText.textContent = 'Size: 300x300 (1:1) | Double Wave & Float | Loop Speed: 3s';
       } else if (currentStyle === 'slanted') {
         statusText.textContent = 'Size: 300x300 (1:1) | 4 Slanted Strips | In-Grow Animation';
+      } else if (currentStyle === 'ink') {
+        statusText.textContent = 'Size: 300x300 (1:1) | Organic Ink Splatter | Smooth Bloom (No Out)';
       }
     }
 
@@ -309,6 +312,113 @@
         drawImageCover(ctx, userImg, 0, 0, RENDER_SIZE, RENDER_SIZE);
         ctx.restore();
       }
+      ctx.restore();
+    }
+
+    // 5th Style: Organic Ink Splatter Mask with Separate Floating Droplets
+    const INK_DROPLETS = [
+      // Primary separated ink droplets (radii 5.0 - 9.5)
+      { angle: 0.35, distRel: 1.14, rad: 8.5 },
+      { angle: 0.78, distRel: 1.20, rad: 5.0 },
+      { angle: 1.15, distRel: 1.15, rad: 7.0 },
+      { angle: 1.55, distRel: 1.22, rad: 9.0 },
+      { angle: 1.95, distRel: 1.13, rad: 6.0 },
+      { angle: 2.35, distRel: 1.18, rad: 7.5 },
+      { angle: 2.80, distRel: 1.12, rad: 8.0 },
+      { angle: 3.25, distRel: 1.22, rad: 6.5 },
+      { angle: 3.70, distRel: 1.15, rad: 7.5 },
+      { angle: 4.15, distRel: 1.20, rad: 9.5 },
+      { angle: 4.60, distRel: 1.14, rad: 6.0 },
+      { angle: 5.05, distRel: 1.21, rad: 8.0 },
+      { angle: 5.50, distRel: 1.16, rad: 7.0 },
+      { angle: 5.95, distRel: 1.22, rad: 8.5 },
+      // Micro splatters (radii 2.5 - 3.5)
+      { angle: 0.55, distRel: 1.28, rad: 3.0 },
+      { angle: 1.35, distRel: 1.29, rad: 3.5 },
+      { angle: 2.15, distRel: 1.27, rad: 2.5 },
+      { angle: 3.45, distRel: 1.30, rad: 3.0 },
+      { angle: 4.35, distRel: 1.28, rad: 3.5 },
+      { angle: 5.25, distRel: 1.29, rad: 3.0 }
+    ];
+
+    // Smooth, gentle ease-out curve for luxurious slow ink expansion
+    function easeInkSlow(p) {
+      if (p <= 0) return 0;
+      if (p >= 1) return 1;
+      const x1 = 0.22, y1 = 1.0, x2 = 0.36, y2 = 1.0;
+      let u = p;
+      for (let i = 0; i < 8; i++) {
+        const x = 3 * (1 - u) * (1 - u) * u * x1 + 3 * (1 - u) * u * u * x2 + u * u * u - p;
+        const dx = 3 * (1 - u) * (1 - u) * x1 + 6 * (1 - u) * u * (x2 - x1) + 3 * u * u * (1 - x2);
+        if (Math.abs(dx) < 1e-6) break;
+        u -= x / dx;
+      }
+      return 3 * (1 - u) * (1 - u) * u * y1 + 3 * (1 - u) * u * u * y2 + u * u * u;
+    }
+
+    function drawInkBloom(rawP) {
+      ctx.clearRect(0, 0, RENDER_SIZE, RENDER_SIZE);
+
+      const p = easeInkSlow(rawP);
+      if (p <= 0.005) return;
+
+      const maxR = 112 * SCALE;
+      // Main ink body expands from 15% to 100%
+      const baseR = maxR * (0.15 + 0.85 * p);
+      // Retains organic harmonic ink turbulence (0.19 at full bloom) so it stays an ink splatter
+      const turb = 0.35 * (1 - p * 0.45);
+
+      ctx.save();
+      ctx.beginPath();
+
+      // 1. Organic ink pool boundary
+      const numPts = 160;
+      for (let i = 0; i <= numPts; i++) {
+        const th = (i % numPts) * 2 * Math.PI / numPts;
+        const noise = (
+          Math.sin(th * 3 + 1.2) * 0.42 +
+          Math.cos(th * 5 - 0.7) * 0.32 +
+          Math.sin(th * 7 + 2.1) * 0.22 +
+          Math.cos(th * 11 + 0.4) * 0.15 +
+          Math.sin(th * 13 - 1.0) * 0.10
+        );
+        const r = baseR * (1 + turb * noise);
+        const x = CENTER + r * Math.cos(th);
+        const y = CENTER + r * Math.sin(th);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+
+      // 2. Separate satellite droplets & micro-splatters (stay visible and separate)
+      for (let i = 0; i < INK_DROPLETS.length; i++) {
+        const d = INK_DROPLETS[i];
+        const dropDist = (baseR * 0.3) + (baseR * d.distRel - baseR * 0.3) * p;
+        const dropX = CENTER + dropDist * Math.cos(d.angle);
+        const dropY = CENTER + dropDist * Math.sin(d.angle);
+        const dropRad = (d.rad * SCALE) * Math.min(1.0, p * 1.3);
+
+        if (dropRad > 0.5) {
+          ctx.moveTo(dropX + dropRad, dropY);
+          ctx.arc(dropX, dropY, dropRad, 0, Math.PI * 2);
+        }
+      }
+
+      ctx.clip();
+
+      // Gentle cinematic in-animation: subtle scale down and glide
+      const inFactor = Math.max(0, 1 - p);
+      const imgScale = 1.0 + inFactor * 0.14;      // ~1.14x zoom -> gently eases to 1.0x
+      const imgOffsetY = -inFactor * (16 * SCALE); // Starts -16px up -> gently glides to 0px
+
+      ctx.save();
+      ctx.translate(CENTER, CENTER + imgOffsetY);
+      ctx.scale(imgScale, imgScale);
+      ctx.translate(-CENTER, -CENTER);
+
+      drawImageCover(ctx, userImg, 0, 0, RENDER_SIZE, RENDER_SIZE);
+      ctx.restore();
+
       ctx.restore();
     }
 
@@ -519,16 +629,22 @@
           pOut = (t - 0.82) / 0.18;
         }
         drawSlantedStrips(pIn, pOut);
+
+      } else if (currentStyle === 'ink') {
+        // Slow, smooth in-bloom (first 32% of loop ~ 2.9s), then holds fully bloomed in organic ink shape (no out animation!)
+        const p = Math.min(1.0, t / 0.32);
+        drawInkBloom(p);
       }
     }
 
-    // Live Preview Loop: 6000ms for Liquid Mask, 7000ms for Slanted Strips, 3000ms for Neon/Pulse
+    // Live Preview Loop: 6000ms for Liquid Mask, 7000ms for Slanted, 9000ms for Ink, 3000ms for Neon/Pulse
     function animatePreview(now) {
       if (!isExporting) {
         const elapsed = now - animStartTime;
         let loopDuration = 3000;
         if (currentStyle === 'blob') loopDuration = 6000;
         else if (currentStyle === 'slanted') loopDuration = 7000;
+        else if (currentStyle === 'ink') loopDuration = 9000;
 
         const t = (elapsed % loopDuration) / loopDuration;
         renderFrame(t);
@@ -546,132 +662,168 @@
       const statusText = document.getElementById('statusText');
       exportBtn.disabled = true;
 
-      // Exact Real-Time Frame Schedule:
-      // Liquid Mask = 6000ms (150 frames @ 40ms)
-      // Neon / Pulse = 3000ms (75 frames @ 40ms)
-      // Slanted Strips = 1:1 Match with reference (38 in-grow @ 40ms + 1 hold @ 6000ms + 24 out @ 40ms = 63 frames)
-      const framesConfig = [];
-      if (currentStyle === 'slanted') {
-        const IN_FRAMES = 38;
-        const OUT_FRAMES = 24;
-        const HOLD_DELAY = 6000;
+      try {
+        // Exact Real-Time Frame Schedule:
+        // Liquid Mask = 6000ms (150 frames @ 40ms)
+        // Neon / Pulse = 3000ms (75 frames @ 40ms)
+        // Slanted = 63 frames (38 in @ 40ms + 1 hold @ 6000ms + 24 out @ 40ms)
+        // Ink Bloom = 51 frames (50 slow in @ 50ms = 2.5s + 1 hold @ 6000ms, NO out animation!)
+        const framesConfig = [];
+        if (currentStyle === 'slanted') {
+          const IN_FRAMES = 38;
+          const OUT_FRAMES = 24;
+          const HOLD_DELAY = 6000;
 
-        for (let i = 0; i < IN_FRAMES; i++) {
-          framesConfig.push({
-            pIn: i / (IN_FRAMES - 1),
-            pOut: 0,
-            delay: 40
-          });
-        }
-        framesConfig.push({
-          pIn: 1,
-          pOut: 0,
-          delay: HOLD_DELAY
-        });
-        for (let i = 0; i < OUT_FRAMES; i++) {
+          for (let i = 0; i < IN_FRAMES; i++) {
+            const p = (i + 1) / IN_FRAMES;
+            framesConfig.push({
+              pIn: p,
+              pOut: 0,
+              delay: 40
+            });
+          }
           framesConfig.push({
             pIn: 1,
-            pOut: (i + 1) / OUT_FRAMES,
-            delay: 40
+            pOut: 0,
+            delay: HOLD_DELAY
           });
-        }
-      } else {
-        const loopDuration = currentStyle === 'blob' ? 6000 : 3000;
-        const delay = 40;
-        const count = loopDuration / delay;
-        for (let i = 0; i < count; i++) {
+          for (let i = 0; i < OUT_FRAMES; i++) {
+            framesConfig.push({
+              pIn: 1,
+              pOut: (i + 1) / OUT_FRAMES,
+              delay: 40
+            });
+          }
+        } else if (currentStyle === 'ink') {
+          const BLOOM_FRAMES = 50;
+          const DELAY = 50; // 50ms per frame for a smooth, slow, gentle bloom
+          const HOLD_DELAY = 6000; // 6 seconds hold (no out animation!)
+
+          for (let i = 0; i < BLOOM_FRAMES; i++) {
+            const p = (i + 1) / BLOOM_FRAMES;
+            framesConfig.push({
+              p: p,
+              delay: DELAY
+            });
+          }
           framesConfig.push({
-            t: i / count,
-            delay: delay
+            p: 1.0,
+            delay: HOLD_DELAY
+          });
+        } else {
+          const loopDuration = currentStyle === 'blob' ? 6000 : 3000;
+          const delay = 40;
+          const count = loopDuration / delay;
+          for (let i = 0; i < count; i++) {
+            framesConfig.push({
+              t: i / count,
+              delay: delay
+            });
+          }
+        }
+
+        const totalFrames = framesConfig.length;
+        const gif = GIFEncoder();
+
+        for (let i = 0; i < totalFrames; i++) {
+          statusText.textContent = `Rendering HD Frame ${i + 1} / ${totalFrames} (300x300)...`;
+          if (i % 3 === 0) {
+            await new Promise(r => setTimeout(r, 8));
+          }
+
+          const cfg = framesConfig[i];
+          if (currentStyle === 'slanted') {
+            drawSlantedStrips(cfg.pIn, cfg.pOut);
+          } else if (currentStyle === 'ink') {
+            drawInkBloom(cfg.p);
+          } else {
+            renderFrame(cfg.t);
+          }
+
+          // Downsample 900x900 -> 300x300
+          exportCtx.clearRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
+          exportCtx.drawImage(previewCanvas, 0, 0, RENDER_SIZE, RENDER_SIZE, 0, 0, EXPORT_SIZE, EXPORT_SIZE);
+
+          const imgData = exportCtx.getImageData(0, 0, EXPORT_SIZE, EXPORT_SIZE);
+          const data = imgData.data;
+
+          // Un-premultiply edge pixels & separate opaque pixels for full 24-bit rgb888 quantization
+          const opaqueRGB = [];
+          for (let p = 0; p < data.length; p += 4) {
+            const a = data[p + 3];
+            if (a >= 128) {
+              // Boost partially anti-aliased edge pixels back to full brightness so border stays clean
+              if (a < 255) {
+                const factor = 255 / a;
+                data[p] = Math.min(255, Math.round(data[p] * factor));
+                data[p + 1] = Math.min(255, Math.round(data[p + 1] * factor));
+                data[p + 2] = Math.min(255, Math.round(data[p + 2] * factor));
+              }
+              data[p + 3] = 255;
+              opaqueRGB.push(data[p], data[p + 1], data[p + 2], 255);
+            } else {
+              data[p + 3] = 0;
+            }
+          }
+
+          let fullPalette;
+          const indexedFrame = new Uint8Array(EXPORT_SIZE * EXPORT_SIZE);
+
+          if (opaqueRGB.length === 0) {
+            // 100% transparent frame (safe handling, prevents empty quantize crash)
+            fullPalette = [[0, 0, 0], [0, 0, 0]];
+          } else {
+            // Full 24-bit 'rgb888' quantization on opaque pixels only (No grain, maximum HD photo sharpness!)
+            const opaqueBytes = new Uint8Array(opaqueRGB);
+            const maxColors = Math.min(255, Math.max(2, Math.floor(opaqueRGB.length / 4)));
+            const subPalette = quantize(opaqueBytes, maxColors, { format: 'rgb888' });
+            fullPalette = [[0, 0, 0], ...subPalette]; // Index 0 = 100% Transparent
+
+            // Map opaque pixels via fast rgb888 lut and keep transparent pixels at index 0
+            const mappedOpaque = applyPalette(opaqueBytes, subPalette, 'rgb888');
+
+            let opaqueCounter = 0;
+            for (let idx = 0, p = 0; idx < indexedFrame.length; idx++, p += 4) {
+              if (data[p + 3] === 255) {
+                indexedFrame[idx] = mappedOpaque[opaqueCounter++] + 1;
+              } else {
+                indexedFrame[idx] = 0;
+              }
+            }
+          }
+
+          gif.writeFrame(indexedFrame, EXPORT_SIZE, EXPORT_SIZE, {
+            palette: fullPalette,
+            delay: cfg.delay,
+            transparent: true,
+            transparentIndex: 0,
+            dispose: 2
           });
         }
+
+        gif.finish();
+        statusText.textContent = 'Downloading 300x300 HD GIF...';
+
+        const bytes = gif.bytes();
+        const blob = new Blob([bytes], { type: 'image/gif' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `liquid-profile-${currentStyle}-300x300.gif`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        isExporting = false;
+        exportBtn.disabled = false;
+        animStartTime = performance.now();
+        statusText.textContent = `✅ 300x300 HD GIF Exported (${currentStyle.toUpperCase()})!`;
+      } catch (err) {
+        console.error('Export failed:', err);
+        statusText.textContent = `❌ Export error: ${err.message}`;
+        isExporting = false;
+        exportBtn.disabled = false;
+        animStartTime = performance.now();
       }
-
-      const totalFrames = framesConfig.length;
-      const gif = GIFEncoder();
-
-      for (let i = 0; i < totalFrames; i++) {
-        statusText.textContent = `Rendering HD Frame ${i + 1} / ${totalFrames} (300x300)...`;
-        if (i % 3 === 0) {
-          await new Promise(r => setTimeout(r, 8));
-        }
-
-        const cfg = framesConfig[i];
-        if (currentStyle === 'slanted') {
-          drawSlantedStrips(cfg.pIn, cfg.pOut);
-        } else {
-          renderFrame(cfg.t);
-        }
-
-        // Downsample 900x900 -> 300x300
-        exportCtx.clearRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
-        exportCtx.drawImage(previewCanvas, 0, 0, RENDER_SIZE, RENDER_SIZE, 0, 0, EXPORT_SIZE, EXPORT_SIZE);
-
-        const imgData = exportCtx.getImageData(0, 0, EXPORT_SIZE, EXPORT_SIZE);
-        const data = imgData.data;
-
-        // Un-premultiply edge pixels & separate opaque pixels for full 24-bit rgb888 quantization
-        const opaqueRGB = [];
-        for (let p = 0; p < data.length; p += 4) {
-          const a = data[p + 3];
-          if (a >= 128) {
-            // Boost partially anti-aliased edge pixels back to full brightness so border stays clean
-            if (a < 255) {
-              const factor = 255 / a;
-              data[p] = Math.min(255, Math.round(data[p] * factor));
-              data[p + 1] = Math.min(255, Math.round(data[p + 1] * factor));
-              data[p + 2] = Math.min(255, Math.round(data[p + 2] * factor));
-            }
-            data[p + 3] = 255;
-            opaqueRGB.push(data[p], data[p + 1], data[p + 2], 255);
-          } else {
-            data[p + 3] = 0;
-          }
-        }
-
-        // Full 24-bit 'rgb888' quantization on opaque pixels only (No grain, maximum HD photo sharpness!)
-        const opaqueBytes = new Uint8Array(opaqueRGB);
-        const subPalette = quantize(opaqueBytes, 255, { format: 'rgb888' });
-        const fullPalette = [[0, 0, 0], ...subPalette]; // Index 0 = 100% Transparent
-
-        // Map opaque pixels via fast rgb888 lut and keep transparent pixels at index 0
-        const mappedOpaque = applyPalette(opaqueBytes, subPalette, 'rgb888');
-        const indexedFrame = new Uint8Array(EXPORT_SIZE * EXPORT_SIZE);
-
-        let opaqueCounter = 0;
-        for (let idx = 0, p = 0; idx < indexedFrame.length; idx++, p += 4) {
-          if (data[p + 3] === 255) {
-            indexedFrame[idx] = mappedOpaque[opaqueCounter++] + 1;
-          } else {
-            indexedFrame[idx] = 0;
-          }
-        }
-
-        gif.writeFrame(indexedFrame, EXPORT_SIZE, EXPORT_SIZE, {
-          palette: fullPalette,
-          delay: cfg.delay,
-          transparent: true,
-          transparentIndex: 0,
-          dispose: 2
-        });
-      }
-
-      gif.finish();
-      statusText.textContent = 'Downloading 300x300 HD GIF...';
-
-      const bytes = gif.bytes();
-      const blob = new Blob([bytes], { type: 'image/gif' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `liquid-profile-${currentStyle}-300x300.gif`;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      isExporting = false;
-      exportBtn.disabled = false;
-      animStartTime = performance.now();
-      statusText.textContent = `✅ 300x300 HD GIF Exported (${currentStyle.toUpperCase()})!`;
     });
   </script>
 </body>
