@@ -605,14 +605,6 @@
 
             <!-- Dynamic Signature Render Container -->
             <div id="signatureOutput"></div>
-
-            <!-- Dark Mode Warning Notice (Shown when gradient is selected in dark mode) -->
-            <div id="darkModeWarning"
-              style="display: none; margin-top: 14px; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 10px 14px; font-size: 12px; color: #fca5a5; line-height: 1.4;">
-              ⚠️ <strong>iPhone Dark Mode Issue Detected:</strong> iOS Gmail does not invert CSS gradients, leaving the
-              background white while turning text white (invisible text). Switch to <strong>Adaptive
-                Transparent</strong> to fix this!
-            </div>
           </div>
         </div>
 
@@ -687,7 +679,6 @@
     const mockupBody = document.getElementById('mockupBody');
     const btnLightMode = document.getElementById('btnLightMode');
     const btnDarkMode = document.getElementById('btnDarkMode');
-    const darkModeWarning = document.getElementById('darkModeWarning');
 
     const signatureOutput = document.getElementById('signatureOutput');
     const copySignatureBtn = document.getElementById('copySignatureBtn');
@@ -703,6 +694,10 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           currentData = { ...DEFAULT_DATA, ...parsed };
+
+          if (currentData.cardTheme === 'gradient') {
+            currentData.cardTheme = 'purewhite';
+          }
 
           fullNameInput.value = currentData.fullName;
           jobTitleInput.value = currentData.jobTitle;
@@ -768,77 +763,66 @@
       const isDarkSim = isSimulation && previewMode === 'dark';
       const theme = currentData.cardTheme;
 
-      // Handle dark mode warning banner
-      if (darkModeWarning) {
-        if (isDarkSim && theme === 'gradient') {
-          darkModeWarning.style.display = 'block';
-        } else {
-          darkModeWarning.style.display = 'none';
-        }
-      }
-
       // Theme Configuration with exact 480px width
       let tableBgAttr = 'bgcolor="#ffffff"';
-      let tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);';
+      let tableStyle = "font-family: 'Segoe UI', Arial, sans-serif; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);";
       let pillBgAttr = 'bgcolor="#ffffff"';
-      let pillStyle = 'background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);';
+      let pillStyle = "background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);";
       let nameColor = '#111827';
       let jobColor = '#6b7280';
       let contactColor = '#4b5563';
 
-      if (theme === 'purewhite') {
-        // Clean White Card (Solid bgcolor allows Gmail iOS to invert both card to dark & text to white)
-        if (isDarkSim) {
-          tableBgAttr = 'bgcolor="#1e1e1e"';
-          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: #1e1e1e; border: 1px solid #374151; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
-          pillBgAttr = 'bgcolor="#2a2a2a"';
-          pillStyle = 'background-color: #2a2a2a; border: 1px solid #3f3f46; border-radius: 30px; padding: 10px 7px;';
-          nameColor = '#ffffff';
-          jobColor = '#9ca3af';
-          contactColor = '#93c5fd';
-        } else {
-          tableBgAttr = 'bgcolor="#ffffff"';
-          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);';
-          pillBgAttr = 'bgcolor="#ffffff"';
-          pillStyle = 'background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);';
-          nameColor = '#111827';
-          jobColor = '#6b7280';
-          contactColor = '#4b5563';
-        }
-      } else if (theme === 'transparent') {
-        tableBgAttr = '';
-        tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: transparent; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px;';
-        pillBgAttr = '';
-        pillStyle = 'background-color: transparent; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px;';
-        if (isDarkSim) {
+      if (isDarkSim) {
+        // Dark Mode Preview (Inverted styling for dark clients)
+        if (theme === 'transparent') {
+          tableBgAttr = '';
+          tableStyle = "font-family: 'Segoe UI', Arial, sans-serif; background-color: transparent; border: 1px solid #374151; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px;";
+          pillBgAttr = '';
+          pillStyle = "background-color: transparent; border: 1px solid #374151; border-radius: 30px; padding: 10px 7px;";
           nameColor = '#ffffff';
           jobColor = '#94a3b8';
           contactColor = '#93c5fd';
-          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: transparent; border: 1px solid #374151; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px;';
-          pillStyle = 'background-color: transparent; border: 1px solid #374151; border-radius: 30px; padding: 10px 7px;';
-        }
-      } else if (theme === 'darkcard') {
-        tableBgAttr = 'bgcolor="#161f33"';
-        tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: #161f33; border: 1px solid #2a3655; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 14px rgba(0,0,0,0.4);';
-        pillBgAttr = 'bgcolor="#1e293b"';
-        pillStyle = 'background-color: #1e293b; border: 1px solid #334155; border-radius: 30px; padding: 10px 7px;';
-        nameColor = '#ffffff';
-        jobColor = '#94a3b8';
-        contactColor = '#60a5fa';
-      } else {
-        // Soft Light Gradient
-        if (isDarkSim) {
-          tableBgAttr = '';
-          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px;';
-          pillStyle = 'background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px;';
+        } else if (theme === 'darkcard') {
+          tableBgAttr = 'bgcolor="#161f33"';
+          tableStyle = "font-family: 'Segoe UI', Arial, sans-serif; background-color: #161f33; border: 1px solid #2a3655; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 14px rgba(0,0,0,0.4);";
+          pillBgAttr = 'bgcolor="#1e293b"';
+          pillStyle = "background-color: #1e293b; border: 1px solid #334155; border-radius: 30px; padding: 10px 7px;";
           nameColor = '#ffffff';
-          jobColor = '#e5e7eb';
-          contactColor = '#d1d5db';
+          jobColor = '#94a3b8';
+          contactColor = '#60a5fa';
         } else {
+          // Pure White / Standard Cards invert to Dark Card on iPhone Gmail
+          tableBgAttr = 'bgcolor="#1e1e1e"';
+          tableStyle = "font-family: 'Segoe UI', Arial, sans-serif; background-color: #1e1e1e; border: 1px solid #374151; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);";
+          pillBgAttr = 'bgcolor="#2a2a2a"';
+          pillStyle = "background-color: #2a2a2a; border: 1px solid #3f3f46; border-radius: 30px; padding: 10px 7px;";
+          nameColor = '#ffffff';
+          jobColor = '#9ca3af';
+          contactColor = '#93c5fd';
+        }
+      } else {
+        // Light Mode / Export Email HTML
+        if (theme === 'transparent') {
           tableBgAttr = '';
-          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%); border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);';
+          tableStyle = "font-family: 'Segoe UI', Arial, sans-serif; background-color: transparent; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px;";
+          pillBgAttr = '';
+          pillStyle = "background-color: transparent; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px;";
+          nameColor = '#111827';
+          jobColor = '#6b7280';
+          contactColor = '#4b5563';
+        } else if (theme === 'darkcard') {
+          tableBgAttr = 'bgcolor="#161f33"';
+          tableStyle = "font-family: 'Segoe UI', Arial, sans-serif; background-color: #161f33; border: 1px solid #2a3655; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 14px rgba(0,0,0,0.4);";
+          pillBgAttr = 'bgcolor="#1e293b"';
+          pillStyle = "background-color: #1e293b; border: 1px solid #334155; border-radius: 30px; padding: 10px 7px;";
+          nameColor = '#ffffff';
+          jobColor = '#94a3b8';
+          contactColor = '#60a5fa';
+        } else {
+          tableBgAttr = 'bgcolor="#ffffff"';
+          tableStyle = "font-family: 'Segoe UI', Arial, sans-serif; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);";
           pillBgAttr = 'bgcolor="#ffffff"';
-          pillStyle = 'background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);';
+          pillStyle = "background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);";
           nameColor = '#111827';
           jobColor = '#6b7280';
           contactColor = '#4b5563';
@@ -850,7 +834,7 @@
       if (currentData.websiteUrl) {
         socialIcons.push({
           url: currentData.websiteUrl,
-          img: 'https://cdn-icons-png.flaticon.com/512/903/903431.png',
+          img: 'https://img.icons8.com/ios/50/0077b5/globe--v1.png',
           alt: 'Web'
         });
       }
