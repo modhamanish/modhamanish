@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -226,9 +227,17 @@
       border-radius: 50%;
     }
 
-    .dot-red { background: #ef4444; }
-    .dot-yellow { background: #eab308; }
-    .dot-green { background: #22c55e; }
+    .dot-red {
+      background: #ef4444;
+    }
+
+    .dot-yellow {
+      background: #eab308;
+    }
+
+    .dot-green {
+      background: #22c55e;
+    }
 
     .mockup-title {
       font-size: 12px;
@@ -415,18 +424,27 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
 
     <header>
       <h1>Email Signature Studio</h1>
-      <p>Edit your details on the left — real-time preview on the right with instant 1-click copy for Gmail & Outlook.</p>
+      <p>Edit your details on the left — real-time preview on the right with instant 1-click copy for Gmail & Outlook.
+      </p>
     </header>
 
     <div class="dashboard-grid">
@@ -477,7 +495,8 @@
 
             <div class="input-group">
               <label for="websiteUrl">Website URL</label>
-              <input type="url" id="websiteUrl" value="https://modhamanish.github.io/info" placeholder="https://example.com">
+              <input type="url" id="websiteUrl" value="https://modhamanish.github.io/info"
+                placeholder="https://example.com">
             </div>
           </div>
         </div>
@@ -490,17 +509,20 @@
 
           <div class="input-group">
             <label for="linkedinUrl">LinkedIn URL</label>
-            <input type="url" id="linkedinUrl" value="https://www.linkedin.com/in/modha-manish0969" placeholder="https://linkedin.com/in/username">
+            <input type="url" id="linkedinUrl" value="https://www.linkedin.com/in/modha-manish0969"
+              placeholder="https://linkedin.com/in/username">
           </div>
 
           <div class="input-group">
             <label for="githubUrl">GitHub URL</label>
-            <input type="url" id="githubUrl" value="https://github.com/modhamanish" placeholder="https://github.com/username">
+            <input type="url" id="githubUrl" value="https://github.com/modhamanish"
+              placeholder="https://github.com/username">
           </div>
 
           <div class="input-group">
             <label for="instagramUrl">Instagram URL</label>
-            <input type="url" id="instagramUrl" value="https://www.instagram.com/manishmodha" placeholder="https://instagram.com/username">
+            <input type="url" id="instagramUrl" value="https://www.instagram.com/manishmodha"
+              placeholder="https://instagram.com/username">
           </div>
         </div>
 
@@ -512,7 +534,9 @@
 
           <div class="input-group">
             <label for="avatarUrl">Image / GIF URL</label>
-            <input type="url" id="avatarUrl" value="https://raw.githubusercontent.com/modhamanish/modhamanish/refs/heads/main/assets/liquid-profile-blob-300x300.gif" placeholder="https://.../profile.gif">
+            <input type="url" id="avatarUrl"
+              value="https://raw.githubusercontent.com/modhamanish/modhamanish/refs/heads/main/assets/liquid-profile-blob-300x300.gif"
+              placeholder="https://.../profile.gif">
             <div class="file-upload-wrapper">
               <label for="avatarFile" class="file-btn">
                 📁 Upload Local Image / GIF
@@ -583,8 +607,11 @@
             <div id="signatureOutput"></div>
 
             <!-- Dark Mode Warning Notice (Shown when gradient is selected in dark mode) -->
-            <div id="darkModeWarning" style="display: none; margin-top: 14px; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 10px 14px; font-size: 12px; color: #fca5a5; line-height: 1.4;">
-              ⚠️ <strong>iPhone Dark Mode Issue Detected:</strong> iOS Gmail does not invert CSS gradients, leaving the background white while turning text white (invisible text). Switch to <strong>Adaptive Transparent</strong> to fix this!
+            <div id="darkModeWarning"
+              style="display: none; margin-top: 14px; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 10px 14px; font-size: 12px; color: #fca5a5; line-height: 1.4;">
+              ⚠️ <strong>iPhone Dark Mode Issue Detected:</strong> iOS Gmail does not invert CSS gradients, leaving the
+              background white while turning text white (invisible text). Switch to <strong>Adaptive
+                Transparent</strong> to fix this!
             </div>
           </div>
         </div>
@@ -608,8 +635,11 @@
           </div>
 
           <div class="instructions-box">
-            📱 <strong>iPhone Dark Mode Safe:</strong> Use <strong>Adaptive Transparent</strong> so your signature looks crisp in both Light and Dark mode without white blocks.<br><br>
-            💡 <strong>How to set in Gmail:</strong> Open Gmail Settings ⚙️ ➔ <em>"See all settings"</em> ➔ Scroll to <em>"Signature"</em> ➔ <em>"+ Create new"</em> ➔ Paste (<strong>Cmd+V / Ctrl+V</strong>) into the signature box ➔ Save Changes!
+            📱 <strong>iPhone Dark Mode Safe:</strong> Use <strong>Adaptive Transparent</strong> so your signature looks
+            crisp in both Light and Dark mode without white blocks.<br><br>
+            💡 <strong>How to set in Gmail:</strong> Open Gmail Settings ⚙️ ➔ <em>"See all settings"</em> ➔ Scroll to
+            <em>"Signature"</em> ➔ <em>"+ Create new"</em> ➔ Paste (<strong>Cmd+V / Ctrl+V</strong>) into the signature
+            box ➔ Save Changes!
           </div>
         </div>
 
@@ -696,11 +726,11 @@
     function saveState() {
       try {
         localStorage.setItem('emailSignatureData_v3', JSON.stringify(currentData));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Toggle Preview Mode (Light vs iPhone Dark Mode)
-    window.setPreviewMode = function(mode) {
+    window.setPreviewMode = function (mode) {
       previewMode = mode;
       if (mode === 'dark') {
         mockupBody.classList.add('dark-preview');
@@ -820,7 +850,7 @@
       if (currentData.websiteUrl) {
         socialIcons.push({
           url: currentData.websiteUrl,
-          img: 'https://cdn-icons-png.flaticon.com/512/1006/1006771.png',
+          img: 'https://cdn-icons-png.flaticon.com/512/903/903431.png',
           alt: 'Web'
         });
       }
@@ -1039,7 +1069,7 @@
     function resetForm() {
       try {
         localStorage.removeItem('emailSignatureData_v3');
-      } catch (e) {}
+      } catch (e) { }
 
       currentData = { ...DEFAULT_DATA };
       fullNameInput.value = DEFAULT_DATA.fullName;
@@ -1071,4 +1101,5 @@
     syncStateFromInputs();
   </script>
 </body>
+
 </html>
