@@ -248,6 +248,57 @@
       justify-content: center;
       align-items: flex-start;
       overflow-x: auto;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .mockup-body.dark-preview {
+      background: #121212 !important;
+      color: #e5e7eb !important;
+    }
+
+    .mockup-body.dark-preview .mockup-dummy-text {
+      color: #94a3b8 !important;
+    }
+
+    .mockup-body.dark-preview .mockup-dummy-divider {
+      background: #27272a !important;
+    }
+
+    /* Dark/Light Preview Toggle */
+    .preview-modes {
+      display: inline-flex;
+      align-items: center;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      padding: 2px;
+      gap: 2px;
+      margin-left: auto;
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .mode-btn:hover {
+      color: #ffffff;
+    }
+
+    .mode-btn.active {
+      background: #3b82f6;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
     }
 
     .mockup-dummy-text {
@@ -483,11 +534,12 @@
             </div>
 
             <div class="input-group">
-              <label for="cardTheme">Card Background</label>
+              <label for="cardTheme">Card Theme</label>
               <select id="cardTheme">
-                <option value="gradient" selected>Light Gradient (#fff to #f3f4f6)</option>
-                <option value="purewhite">Pure White (#ffffff)</option>
-                <option value="softblue">Subtle Soft Blue</option>
+                <option value="purewhite" selected>⬜ Clean White Card (Dark Mode Safe)</option>
+                <option value="transparent">🌟 Adaptive Transparent</option>
+                <option value="darkcard">⬛ Modern Dark Slate (#161f33)</option>
+                <option value="gradient">🎨 Soft Light Gradient</option>
               </select>
             </div>
           </div>
@@ -506,10 +558,20 @@
               <span class="dot dot-yellow"></span>
               <span class="dot dot-green"></span>
             </div>
-            <span class="mockup-title">Live Email Client Preview (Gmail / Outlook)</span>
+            <span class="mockup-title">Email Client Preview</span>
+
+            <!-- Dark / Light Mode Preview Toggle -->
+            <div class="preview-modes">
+              <button type="button" class="mode-btn active" id="btnLightMode" onclick="setPreviewMode('light')">
+                ☀️ Light
+              </button>
+              <button type="button" class="mode-btn" id="btnDarkMode" onclick="setPreviewMode('dark')">
+                🌙 iPhone Dark Mode
+              </button>
+            </div>
           </div>
 
-          <div class="mockup-body">
+          <div class="mockup-body" id="mockupBody">
             <div class="mockup-dummy-text">
               "Hi there,<br>
               Please find the latest updates attached. Looking forward to our discussion."
@@ -519,6 +581,11 @@
 
             <!-- Dynamic Signature Render Container -->
             <div id="signatureOutput"></div>
+
+            <!-- Dark Mode Warning Notice (Shown when gradient is selected in dark mode) -->
+            <div id="darkModeWarning" style="display: none; margin-top: 14px; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 10px 14px; font-size: 12px; color: #fca5a5; line-height: 1.4;">
+              ⚠️ <strong>iPhone Dark Mode Issue Detected:</strong> iOS Gmail does not invert CSS gradients, leaving the background white while turning text white (invisible text). Switch to <strong>Adaptive Transparent</strong> to fix this!
+            </div>
           </div>
         </div>
 
@@ -541,7 +608,8 @@
           </div>
 
           <div class="instructions-box">
-            💡 <strong>How to set in Gmail:</strong> Open Gmail Settings ⚙️ ➔ Click <em>"See all settings"</em> ➔ Scroll down to <em>"Signature"</em> ➔ Click <em>"+ Create new"</em> ➔ Paste (<strong>Cmd+V / Ctrl+V</strong>) into the signature box ➔ Save Changes!
+            📱 <strong>iPhone Dark Mode Safe:</strong> Use <strong>Adaptive Transparent</strong> so your signature looks crisp in both Light and Dark mode without white blocks.<br><br>
+            💡 <strong>How to set in Gmail:</strong> Open Gmail Settings ⚙️ ➔ <em>"See all settings"</em> ➔ Scroll to <em>"Signature"</em> ➔ <em>"+ Create new"</em> ➔ Paste (<strong>Cmd+V / Ctrl+V</strong>) into the signature box ➔ Save Changes!
           </div>
         </div>
 
@@ -552,7 +620,7 @@
   </div>
 
   <script>
-    // State with default values
+    // State with default values (Exact original 480px width & 125px avatar)
     const DEFAULT_DATA = {
       fullName: 'Manish Modha',
       jobTitle: 'Sr. Software Developer',
@@ -565,10 +633,11 @@
       instagramUrl: 'https://www.instagram.com/manishmodha',
       avatarUrl: 'https://raw.githubusercontent.com/modhamanish/modhamanish/refs/heads/main/assets/liquid-profile-blob-300x300.gif',
       avatarCorner: '12px',
-      cardTheme: 'gradient'
+      cardTheme: 'purewhite'
     };
 
     let currentData = { ...DEFAULT_DATA };
+    let previewMode = 'light'; // 'light' or 'dark'
 
     // DOM Elements
     const fullNameInput = document.getElementById('fullName');
@@ -585,12 +654,65 @@
     const avatarCornerInput = document.getElementById('avatarCorner');
     const cardThemeInput = document.getElementById('cardTheme');
 
+    const mockupBody = document.getElementById('mockupBody');
+    const btnLightMode = document.getElementById('btnLightMode');
+    const btnDarkMode = document.getElementById('btnDarkMode');
+    const darkModeWarning = document.getElementById('darkModeWarning');
+
     const signatureOutput = document.getElementById('signatureOutput');
     const copySignatureBtn = document.getElementById('copySignatureBtn');
     const copyHtmlBtn = document.getElementById('copyHtmlBtn');
     const resetBtn = document.getElementById('resetBtn');
     const toastPill = document.getElementById('toastPill');
     const fileNameHint = document.getElementById('fileNameHint');
+
+    // Load from localStorage if previously edited
+    function loadSavedState() {
+      try {
+        const saved = localStorage.getItem('emailSignatureData_v3');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          currentData = { ...DEFAULT_DATA, ...parsed };
+
+          fullNameInput.value = currentData.fullName;
+          jobTitleInput.value = currentData.jobTitle;
+          showBadgeInput.checked = currentData.showBadge;
+          emailAddrInput.value = currentData.emailAddr;
+          phoneNumberInput.value = currentData.phoneNumber;
+          websiteUrlInput.value = currentData.websiteUrl;
+          linkedinUrlInput.value = currentData.linkedinUrl;
+          githubUrlInput.value = currentData.githubUrl;
+          instagramUrlInput.value = currentData.instagramUrl;
+          avatarUrlInput.value = currentData.avatarUrl;
+          avatarCornerInput.value = currentData.avatarCorner;
+          cardThemeInput.value = currentData.cardTheme || 'purewhite';
+        }
+      } catch (e) {
+        console.warn('Could not load saved state:', e);
+      }
+    }
+
+    // Save state to localStorage
+    function saveState() {
+      try {
+        localStorage.setItem('emailSignatureData_v3', JSON.stringify(currentData));
+      } catch (e) {}
+    }
+
+    // Toggle Preview Mode (Light vs iPhone Dark Mode)
+    window.setPreviewMode = function(mode) {
+      previewMode = mode;
+      if (mode === 'dark') {
+        mockupBody.classList.add('dark-preview');
+        btnDarkMode.classList.add('active');
+        btnLightMode.classList.remove('active');
+      } else {
+        mockupBody.classList.remove('dark-preview');
+        btnLightMode.classList.add('active');
+        btnDarkMode.classList.remove('active');
+      }
+      renderSignature();
+    };
 
     // Read form inputs
     function syncStateFromInputs() {
@@ -607,17 +729,90 @@
       currentData.avatarCorner = avatarCornerInput.value;
       currentData.cardTheme = cardThemeInput.value;
 
+      saveState();
       renderSignature();
     }
 
-    // Render pure email-safe table signature
-    function renderSignature() {
-      // Background gradient/color
-      let bgStyle = 'background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);';
-      if (currentData.cardTheme === 'purewhite') {
-        bgStyle = 'background: #ffffff;';
-      } else if (currentData.cardTheme === 'softblue') {
-        bgStyle = 'background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);';
+    // Generate Pure Email-Safe HTML preserving exact 480px width
+    function buildSignatureHTML(isSimulation = false) {
+      const isDarkSim = isSimulation && previewMode === 'dark';
+      const theme = currentData.cardTheme;
+
+      // Handle dark mode warning banner
+      if (darkModeWarning) {
+        if (isDarkSim && theme === 'gradient') {
+          darkModeWarning.style.display = 'block';
+        } else {
+          darkModeWarning.style.display = 'none';
+        }
+      }
+
+      // Theme Configuration with exact 480px width
+      let tableBgAttr = 'bgcolor="#ffffff"';
+      let tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);';
+      let pillBgAttr = 'bgcolor="#ffffff"';
+      let pillStyle = 'background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);';
+      let nameColor = '#111827';
+      let jobColor = '#6b7280';
+      let contactColor = '#4b5563';
+
+      if (theme === 'purewhite') {
+        // Clean White Card (Solid bgcolor allows Gmail iOS to invert both card to dark & text to white)
+        if (isDarkSim) {
+          tableBgAttr = 'bgcolor="#1e1e1e"';
+          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: #1e1e1e; border: 1px solid #374151; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
+          pillBgAttr = 'bgcolor="#2a2a2a"';
+          pillStyle = 'background-color: #2a2a2a; border: 1px solid #3f3f46; border-radius: 30px; padding: 10px 7px;';
+          nameColor = '#ffffff';
+          jobColor = '#9ca3af';
+          contactColor = '#93c5fd';
+        } else {
+          tableBgAttr = 'bgcolor="#ffffff"';
+          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);';
+          pillBgAttr = 'bgcolor="#ffffff"';
+          pillStyle = 'background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);';
+          nameColor = '#111827';
+          jobColor = '#6b7280';
+          contactColor = '#4b5563';
+        }
+      } else if (theme === 'transparent') {
+        tableBgAttr = '';
+        tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: transparent; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px;';
+        pillBgAttr = '';
+        pillStyle = 'background-color: transparent; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px;';
+        if (isDarkSim) {
+          nameColor = '#ffffff';
+          jobColor = '#94a3b8';
+          contactColor = '#93c5fd';
+          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: transparent; border: 1px solid #374151; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px;';
+          pillStyle = 'background-color: transparent; border: 1px solid #374151; border-radius: 30px; padding: 10px 7px;';
+        }
+      } else if (theme === 'darkcard') {
+        tableBgAttr = 'bgcolor="#161f33"';
+        tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background-color: #161f33; border: 1px solid #2a3655; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 14px rgba(0,0,0,0.4);';
+        pillBgAttr = 'bgcolor="#1e293b"';
+        pillStyle = 'background-color: #1e293b; border: 1px solid #334155; border-radius: 30px; padding: 10px 7px;';
+        nameColor = '#ffffff';
+        jobColor = '#94a3b8';
+        contactColor = '#60a5fa';
+      } else {
+        // Soft Light Gradient
+        if (isDarkSim) {
+          tableBgAttr = '';
+          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px;';
+          pillStyle = 'background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px;';
+          nameColor = '#ffffff';
+          jobColor = '#e5e7eb';
+          contactColor = '#d1d5db';
+        } else {
+          tableBgAttr = '';
+          tableStyle = 'font-family: \'Segoe UI\', Arial, sans-serif; background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%); border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);';
+          pillBgAttr = 'bgcolor="#ffffff"';
+          pillStyle = 'background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);';
+          nameColor = '#111827';
+          jobColor = '#6b7280';
+          contactColor = '#4b5563';
+        }
       }
 
       // Build social icons list
@@ -656,11 +851,12 @@
         const rows = socialIcons.map((item, idx) => {
           const isLast = idx === socialIcons.length - 1;
           const pb = isLast ? '0px' : '10px';
+          const iconFilter = (isDarkSim && (item.alt === 'GitHub' || item.alt === 'Web')) ? 'filter: brightness(2) invert(1);' : '';
           return `
             <tr>
               <td align="center" style="padding-bottom: ${pb};">
                 <a href="${item.url}" target="_blank" style="text-decoration: none;">
-                  <img src="${item.img}" width="14" height="14" alt="${item.alt}" style="display: block; opacity: 0.75; border: 0;">
+                  <img src="${item.img}" width="14" height="14" alt="${item.alt}" style="display: block; opacity: 0.75; border: 0; ${iconFilter}">
                 </a>
               </td>
             </tr>`;
@@ -668,8 +864,8 @@
 
         socialPillHtml = `
           <td valign="middle" style="padding-right: 16px;">
-            <table cellpadding="0" cellspacing="0" border="0"
-              style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+            <table cellpadding="0" cellspacing="0" border="0" ${pillBgAttr}
+              style="${pillStyle}">
               ${rows}
             </table>
           </td>`;
@@ -683,7 +879,7 @@
 
       // Job Title HTML
       const jobHtml = currentData.jobTitle ? `
-        <div style="font-size: 13px; color: #6b7280; margin-bottom: 10px; font-weight: 500;">
+        <div style="font-size: 13px; color: ${jobColor}; margin-bottom: 10px; font-weight: 500;">
           ${currentData.jobTitle}
         </div>` : '';
 
@@ -691,47 +887,48 @@
       let contactHtml = '';
       if (currentData.emailAddr) {
         contactHtml += `
-          <a href="mailto:${currentData.emailAddr}" style="color: #4b5563; text-decoration: none; display: block; font-size: 13px;">
+          <a href="mailto:${currentData.emailAddr}" style="color: ${contactColor}; text-decoration: none; display: block; font-size: 13px;">
             ${currentData.emailAddr}
           </a>`;
       }
       if (currentData.phoneNumber) {
-        // Strip non-digits for tel: link
         const cleanPhone = currentData.phoneNumber.replace(/[^+\d]/g, '');
         contactHtml += `
-          <a href="tel:${cleanPhone}" target="_blank" style="font-size: 12.5px; color: #4b5563; text-decoration: none; display: block; margin-top: 2px;">
+          <a href="tel:${cleanPhone}" target="_blank" style="font-size: 12.5px; color: ${contactColor}; text-decoration: none; display: block; margin-top: 2px;">
             ${currentData.phoneNumber}
           </a>`;
       }
 
-      // Final Email Signature Table
-      const signatureHtml = `
-  <table cellpadding="0" cellspacing="0" border="0"
-    style="font-family: 'Segoe UI', Arial, sans-serif; ${bgStyle} border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-    <tr>
-      ${socialPillHtml}
-      <td valign="middle" style="padding-right: 15px; width: 230px;">
-        <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 2px;">
-          <tr>
-            <td valign="middle" style="font-size: 20px; font-weight: 700; color: #111827; padding-right: 5px;">
-              ${currentData.fullName}
-            </td>
-            ${badgeHtml}
-          </tr>
-        </table>
-        ${jobHtml}
-        <div style="font-size: 13px; line-height: 1.5;">
-          ${contactHtml}
-        </div>
-      </td>
-      <td valign="middle" align="right">
-        <img src="${currentData.avatarUrl}" width="125" height="125" alt="Profile"
-          style="display: block; border-radius: ${currentData.avatarCorner}; object-fit: cover; border: 0;">
-      </td>
-    </tr>
-  </table>`.trim();
+      return `
+<table cellpadding="0" cellspacing="0" border="0" ${tableBgAttr}
+  style="${tableStyle}">
+  <tr>
+    ${socialPillHtml}
+    <td valign="middle" style="padding-right: 15px; width: 230px;">
+      <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 2px;">
+        <tr>
+          <td valign="middle" style="font-size: 20px; font-weight: 700; color: ${nameColor}; padding-right: 5px;">
+            ${currentData.fullName}
+          </td>
+          ${badgeHtml}
+        </tr>
+      </table>
+      ${jobHtml}
+      <div style="font-size: 13px; line-height: 1.5;">
+        ${contactHtml}
+      </div>
+    </td>
+    <td valign="middle" align="right">
+      <img src="${currentData.avatarUrl}" width="125" height="125" alt="Profile"
+        style="display: block; border-radius: ${currentData.avatarCorner}; object-fit: cover; border: 0;">
+    </td>
+  </tr>
+</table>`.trim();
+    }
 
-      signatureOutput.innerHTML = signatureHtml;
+    // Render signature into preview container
+    function renderSignature() {
+      signatureOutput.innerHTML = buildSignatureHTML(true);
     }
 
     // Attach real-time input listeners
@@ -739,7 +936,7 @@
       fullNameInput, jobTitleInput, showBadgeInput, emailAddrInput,
       phoneNumberInput, websiteUrlInput, linkedinUrlInput, githubUrlInput,
       instagramUrlInput, avatarUrlInput, avatarCornerInput, cardThemeInput
-    ].forEach(el => {
+    ].filter(Boolean).forEach(el => {
       el.addEventListener('input', syncStateFromInputs);
       el.addEventListener('change', syncStateFromInputs);
     });
@@ -771,15 +968,20 @@
 
     // Copy rich signature (for Gmail, Outlook, Apple Mail)
     async function copyRichSignature() {
-      const htmlContent = signatureOutput.innerHTML;
-      const textContent = signatureOutput.innerText;
+      const cleanHtml = buildSignatureHTML(false);
 
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'fixed';
+      tempDiv.style.left = '-9999px';
+      tempDiv.innerHTML = cleanHtml;
+      document.body.appendChild(tempDiv);
+
+      const textContent = tempDiv.innerText;
       let success = false;
 
-      // Method 1: Modern navigator.clipboard with ClipboardItem (HTML + PlainText)
       if (navigator.clipboard && window.ClipboardItem) {
         try {
-          const blobHtml = new Blob([htmlContent], { type: 'text/html' });
+          const blobHtml = new Blob([cleanHtml], { type: 'text/html' });
           const blobText = new Blob([textContent], { type: 'text/plain' });
           await navigator.clipboard.write([
             new ClipboardItem({
@@ -789,16 +991,15 @@
           ]);
           success = true;
         } catch (err) {
-          console.warn('ClipboardItem write failed, using selection fallback:', err);
+          console.warn('ClipboardItem write failed, fallback to range selection:', err);
         }
       }
 
-      // Method 2: DOM Selection range fallback (100% browser support)
       if (!success) {
         try {
           const selection = window.getSelection();
           const range = document.createRange();
-          range.selectNodeContents(signatureOutput);
+          range.selectNodeContents(tempDiv);
           selection.removeAllRanges();
           selection.addRange(range);
           success = document.execCommand('copy');
@@ -808,33 +1009,39 @@
         }
       }
 
+      document.body.removeChild(tempDiv);
+
       if (success) {
-        showNotification('✅ Signature copied! Now go to Gmail Settings > Signature and press Ctrl+V / Cmd+V.');
+        showNotification('✅ Signature copied! Now go to Gmail Settings > Signature and press Cmd+V / Ctrl+V.');
       } else {
-        showNotification('❌ Could not copy automatically. Please select the signature and press Ctrl+C / Cmd+C.');
+        showNotification('❌ Could not copy automatically. Please select the signature and press Cmd+C.');
       }
     }
 
     // Copy raw HTML code
     async function copyHtmlCode() {
-      const htmlContent = signatureOutput.innerHTML;
+      const cleanHtml = buildSignatureHTML(false);
       try {
-        await navigator.clipboard.writeText(htmlContent);
-        showNotification('✅ Raw HTML code copied to clipboard!');
+        await navigator.clipboard.writeText(cleanHtml);
+        showNotification('✅ Clean HTML code copied to clipboard!');
       } catch (err) {
-        // Fallback
         const ta = document.createElement('textarea');
-        ta.value = htmlContent;
+        ta.value = cleanHtml;
         document.body.appendChild(ta);
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        showNotification('✅ Raw HTML code copied to clipboard!');
+        showNotification('✅ Clean HTML code copied to clipboard!');
       }
     }
 
     // Reset to default
     function resetForm() {
+      try {
+        localStorage.removeItem('emailSignatureData_v3');
+      } catch (e) {}
+
+      currentData = { ...DEFAULT_DATA };
       fullNameInput.value = DEFAULT_DATA.fullName;
       jobTitleInput.value = DEFAULT_DATA.jobTitle;
       showBadgeInput.checked = DEFAULT_DATA.showBadge;
@@ -859,7 +1066,8 @@
     copyHtmlBtn.addEventListener('click', copyHtmlCode);
     resetBtn.addEventListener('click', resetForm);
 
-    // Initial render
+    // Initial setup
+    loadSavedState();
     syncStateFromInputs();
   </script>
 </body>
