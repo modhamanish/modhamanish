@@ -1,100 +1,866 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Email Signature</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Email Signature Generator & Live Preview</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0b0f19;
+      color: #ffffff;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1240px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    /* Main Grid: Left Form, Right Preview */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 26px;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Form Card */
+    .form-card {
+      background: #161f33;
+      border: 1px solid #2a3655;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #60a5fa;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .input-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .input-group label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .input-group input[type="text"],
+    .input-group input[type="email"],
+    .input-group input[type="tel"],
+    .input-group input[type="url"],
+    .input-group select {
+      background: #0b0f19;
+      border: 1px solid #2a3655;
+      color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      outline: none;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #cbd5e1;
+      user-select: none;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #3b82f6;
+      cursor: pointer;
+    }
+
+    /* Custom File Input Pill */
+    .file-upload-wrapper {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .file-btn {
+      background: #202b45;
+      color: #94a3b8;
+      border: 1px dashed #3e4f7a;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .file-btn:hover {
+      background: #2a385c;
+      color: #ffffff;
+      border-color: #60a5fa;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    /* Right Preview Sticky Column */
+    .preview-column {
+      position: sticky;
+      top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Email Mockup Card */
+    .mockup-window {
+      background: #161f33;
+      border: 1px solid #2a3655;
+      border-radius: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mockup-header {
+      background: #0f172a;
+      padding: 12px 18px;
+      border-bottom: 1px solid #2a3655;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #eab308; }
+    .dot-green { background: #22c55e; }
+
+    .mockup-title {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    /* Email Body Canvas */
+    .mockup-body {
+      background: #ffffff;
+      padding: 30px;
+      color: #1f2937;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-x: auto;
+    }
+
+    .mockup-dummy-text {
+      font-size: 13.5px;
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      max-width: 520px;
+      font-style: italic;
+    }
+
+    .mockup-dummy-divider {
+      width: 100%;
+      height: 1px;
+      background: #e5e7eb;
+      margin-bottom: 20px;
+    }
+
+    /* Action Buttons Row */
+    .actions-card {
+      background: #161f33;
+      border: 1px solid #2a3655;
+      border-radius: 20px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .buttons-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .btn-secondary {
+      background: #202b45;
+      color: #cbd5e1;
+      border: 1px solid #2a3655;
+    }
+
+    .btn-secondary:hover {
+      background: #2a385c;
+      color: #ffffff;
+    }
+
+    .btn-reset {
+      background: transparent;
+      color: #94a3b8;
+      padding: 10px 18px;
+    }
+
+    .btn-reset:hover {
+      color: #ef4444;
+    }
+
+    /* Toast Notification */
+    .toast-pill {
+      font-size: 13px;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 10px 16px;
+      border-radius: 12px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .instructions-box {
+      font-size: 12.5px;
+      color: #94a3b8;
+      line-height: 1.5;
+      background: rgba(11, 15, 25, 0.6);
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid #1e293b;
+    }
+
+    .instructions-box strong {
+      color: #e2e8f0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
+<body>
 
-<body style="margin: 20px; font-family: Arial, Helvetica, sans-serif;">
+  <div class="container">
 
-  <!-- SIGNATURE START (Select and copy everything inside this table) -->
+    <header>
+      <h1>Email Signature Studio</h1>
+      <p>Edit your details on the left — real-time preview on the right with instant 1-click copy for Gmail & Outlook.</p>
+    </header>
+
+    <div class="dashboard-grid">
+
+      <!-- LEFT: Dynamic Form -->
+      <div class="form-card">
+
+        <!-- 1. Personal Info -->
+        <div>
+          <div class="section-title">
+            <span>👤 Personal Details</span>
+          </div>
+
+          <div class="input-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" value="Manish Modha" placeholder="e.g. Manish Modha">
+          </div>
+
+          <div class="input-group">
+            <label for="jobTitle">Job Title / Designation</label>
+            <input type="text" id="jobTitle" value="Sr. Software Developer" placeholder="e.g. Sr. Software Developer">
+          </div>
+
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="showBadge" checked>
+              Show Blue Verified Badge
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Contact Details -->
+        <div>
+          <div class="section-title">
+            <span>📞 Contact Information</span>
+          </div>
+
+          <div class="input-group">
+            <label for="emailAddr">Email Address</label>
+            <input type="email" id="emailAddr" value="mr.manishmodha@gmail.com" placeholder="e.g. name@company.com">
+          </div>
+
+          <div class="input-row">
+            <div class="input-group">
+              <label for="phoneNumber">Phone Number</label>
+              <input type="tel" id="phoneNumber" value="+91 99743 06701" placeholder="+91 99999 99999">
+            </div>
+
+            <div class="input-group">
+              <label for="websiteUrl">Website URL</label>
+              <input type="url" id="websiteUrl" value="https://modhamanish.github.io/info" placeholder="https://example.com">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Social Media Links -->
+        <div>
+          <div class="section-title">
+            <span>🌐 Social Links (Leave empty to hide)</span>
+          </div>
+
+          <div class="input-group">
+            <label for="linkedinUrl">LinkedIn URL</label>
+            <input type="url" id="linkedinUrl" value="https://www.linkedin.com/in/modha-manish0969" placeholder="https://linkedin.com/in/username">
+          </div>
+
+          <div class="input-group">
+            <label for="githubUrl">GitHub URL</label>
+            <input type="url" id="githubUrl" value="https://github.com/modhamanish" placeholder="https://github.com/username">
+          </div>
+
+          <div class="input-group">
+            <label for="instagramUrl">Instagram URL</label>
+            <input type="url" id="instagramUrl" value="https://www.instagram.com/manishmodha" placeholder="https://instagram.com/username">
+          </div>
+        </div>
+
+        <!-- 4. Avatar & Appearance -->
+        <div>
+          <div class="section-title">
+            <span>🖼️ Profile Picture / Animated GIF</span>
+          </div>
+
+          <div class="input-group">
+            <label for="avatarUrl">Image / GIF URL</label>
+            <input type="url" id="avatarUrl" value="https://raw.githubusercontent.com/modhamanish/modhamanish/refs/heads/main/assets/liquid-profile-blob-300x300.gif" placeholder="https://.../profile.gif">
+            <div class="file-upload-wrapper">
+              <label for="avatarFile" class="file-btn">
+                📁 Upload Local Image / GIF
+              </label>
+              <input type="file" id="avatarFile" accept="image/*">
+              <span id="fileNameHint" style="font-size: 11.5px; color: #94a3b8;">Supports Animated GIF & PNG</span>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="input-group">
+              <label for="avatarCorner">Avatar Corner</label>
+              <select id="avatarCorner">
+                <option value="12px" selected>Rounded (12px)</option>
+                <option value="50%">Circle (50%)</option>
+                <option value="4px">Slight Curve (4px)</option>
+                <option value="0px">Square (0px)</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="cardTheme">Card Background</label>
+              <select id="cardTheme">
+                <option value="gradient" selected>Light Gradient (#fff to #f3f4f6)</option>
+                <option value="purewhite">Pure White (#ffffff)</option>
+                <option value="softblue">Subtle Soft Blue</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Sticky Live Preview -->
+      <div class="preview-column">
+
+        <!-- Mockup Preview Box -->
+        <div class="mockup-window">
+          <div class="mockup-header">
+            <div class="window-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <span class="mockup-title">Live Email Client Preview (Gmail / Outlook)</span>
+          </div>
+
+          <div class="mockup-body">
+            <div class="mockup-dummy-text">
+              "Hi there,<br>
+              Please find the latest updates attached. Looking forward to our discussion."
+            </div>
+
+            <div class="mockup-dummy-divider"></div>
+
+            <!-- Dynamic Signature Render Container -->
+            <div id="signatureOutput"></div>
+          </div>
+        </div>
+
+        <!-- Actions & Copy Button -->
+        <div class="actions-card">
+          <div class="buttons-row">
+            <button id="copySignatureBtn" class="btn btn-primary">
+              📋 Copy Signature for Email
+            </button>
+            <button id="copyHtmlBtn" class="btn btn-secondary">
+              📄 Copy HTML Code
+            </button>
+            <button id="resetBtn" class="btn btn-reset">
+              ↺ Reset
+            </button>
+          </div>
+
+          <div class="toast-pill" id="toastPill">
+            <span>✅ Copied to clipboard! Ready to paste (Ctrl+V / Cmd+V) directly into Gmail or Outlook.</span>
+          </div>
+
+          <div class="instructions-box">
+            💡 <strong>How to set in Gmail:</strong> Open Gmail Settings ⚙️ ➔ Click <em>"See all settings"</em> ➔ Scroll down to <em>"Signature"</em> ➔ Click <em>"+ Create new"</em> ➔ Paste (<strong>Cmd+V / Ctrl+V</strong>) into the signature box ➔ Save Changes!
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // State with default values
+    const DEFAULT_DATA = {
+      fullName: 'Manish Modha',
+      jobTitle: 'Sr. Software Developer',
+      showBadge: true,
+      emailAddr: 'mr.manishmodha@gmail.com',
+      phoneNumber: '+91 99743 06701',
+      websiteUrl: 'https://modhamanish.github.io/info',
+      linkedinUrl: 'https://www.linkedin.com/in/modha-manish0969',
+      githubUrl: 'https://github.com/modhamanish',
+      instagramUrl: 'https://www.instagram.com/manishmodha',
+      avatarUrl: 'https://raw.githubusercontent.com/modhamanish/modhamanish/refs/heads/main/assets/liquid-profile-blob-300x300.gif',
+      avatarCorner: '12px',
+      cardTheme: 'gradient'
+    };
+
+    let currentData = { ...DEFAULT_DATA };
+
+    // DOM Elements
+    const fullNameInput = document.getElementById('fullName');
+    const jobTitleInput = document.getElementById('jobTitle');
+    const showBadgeInput = document.getElementById('showBadge');
+    const emailAddrInput = document.getElementById('emailAddr');
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const websiteUrlInput = document.getElementById('websiteUrl');
+    const linkedinUrlInput = document.getElementById('linkedinUrl');
+    const githubUrlInput = document.getElementById('githubUrl');
+    const instagramUrlInput = document.getElementById('instagramUrl');
+    const avatarUrlInput = document.getElementById('avatarUrl');
+    const avatarFileInput = document.getElementById('avatarFile');
+    const avatarCornerInput = document.getElementById('avatarCorner');
+    const cardThemeInput = document.getElementById('cardTheme');
+
+    const signatureOutput = document.getElementById('signatureOutput');
+    const copySignatureBtn = document.getElementById('copySignatureBtn');
+    const copyHtmlBtn = document.getElementById('copyHtmlBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const toastPill = document.getElementById('toastPill');
+    const fileNameHint = document.getElementById('fileNameHint');
+
+    // Read form inputs
+    function syncStateFromInputs() {
+      currentData.fullName = fullNameInput.value.trim() || 'Your Name';
+      currentData.jobTitle = jobTitleInput.value.trim();
+      currentData.showBadge = showBadgeInput.checked;
+      currentData.emailAddr = emailAddrInput.value.trim();
+      currentData.phoneNumber = phoneNumberInput.value.trim();
+      currentData.websiteUrl = websiteUrlInput.value.trim();
+      currentData.linkedinUrl = linkedinUrlInput.value.trim();
+      currentData.githubUrl = githubUrlInput.value.trim();
+      currentData.instagramUrl = instagramUrlInput.value.trim();
+      currentData.avatarUrl = avatarUrlInput.value.trim() || DEFAULT_DATA.avatarUrl;
+      currentData.avatarCorner = avatarCornerInput.value;
+      currentData.cardTheme = cardThemeInput.value;
+
+      renderSignature();
+    }
+
+    // Render pure email-safe table signature
+    function renderSignature() {
+      // Background gradient/color
+      let bgStyle = 'background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);';
+      if (currentData.cardTheme === 'purewhite') {
+        bgStyle = 'background: #ffffff;';
+      } else if (currentData.cardTheme === 'softblue') {
+        bgStyle = 'background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);';
+      }
+
+      // Build social icons list
+      const socialIcons = [];
+      if (currentData.websiteUrl) {
+        socialIcons.push({
+          url: currentData.websiteUrl,
+          img: 'https://cdn-icons-png.flaticon.com/512/1006/1006771.png',
+          alt: 'Web'
+        });
+      }
+      if (currentData.instagramUrl) {
+        socialIcons.push({
+          url: currentData.instagramUrl,
+          img: 'https://cdn-icons-png.flaticon.com/512/1384/1384063.png',
+          alt: 'IG'
+        });
+      }
+      if (currentData.linkedinUrl) {
+        socialIcons.push({
+          url: currentData.linkedinUrl,
+          img: 'https://cdn-icons-png.flaticon.com/512/3536/3536505.png',
+          alt: 'IN'
+        });
+      }
+      if (currentData.githubUrl) {
+        socialIcons.push({
+          url: currentData.githubUrl,
+          img: 'https://cdn-icons-png.flaticon.com/512/733/733553.png',
+          alt: 'GitHub'
+        });
+      }
+
+      let socialPillHtml = '';
+      if (socialIcons.length > 0) {
+        const rows = socialIcons.map((item, idx) => {
+          const isLast = idx === socialIcons.length - 1;
+          const pb = isLast ? '0px' : '10px';
+          return `
+            <tr>
+              <td align="center" style="padding-bottom: ${pb};">
+                <a href="${item.url}" target="_blank" style="text-decoration: none;">
+                  <img src="${item.img}" width="14" height="14" alt="${item.alt}" style="display: block; opacity: 0.75; border: 0;">
+                </a>
+              </td>
+            </tr>`;
+        }).join('');
+
+        socialPillHtml = `
+          <td valign="middle" style="padding-right: 16px;">
+            <table cellpadding="0" cellspacing="0" border="0"
+              style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+              ${rows}
+            </table>
+          </td>`;
+      }
+
+      // Verified Badge HTML
+      const badgeHtml = currentData.showBadge ? `
+        <td valign="middle">
+          <img src="https://cdn-icons-png.flaticon.com/512/7641/7641727.png" width="15" height="15" alt="Verified" style="display: block; border: 0;">
+        </td>` : '';
+
+      // Job Title HTML
+      const jobHtml = currentData.jobTitle ? `
+        <div style="font-size: 13px; color: #6b7280; margin-bottom: 10px; font-weight: 500;">
+          ${currentData.jobTitle}
+        </div>` : '';
+
+      // Contact Links HTML
+      let contactHtml = '';
+      if (currentData.emailAddr) {
+        contactHtml += `
+          <a href="mailto:${currentData.emailAddr}" style="color: #4b5563; text-decoration: none; display: block; font-size: 13px;">
+            ${currentData.emailAddr}
+          </a>`;
+      }
+      if (currentData.phoneNumber) {
+        // Strip non-digits for tel: link
+        const cleanPhone = currentData.phoneNumber.replace(/[^+\d]/g, '');
+        contactHtml += `
+          <a href="tel:${cleanPhone}" target="_blank" style="font-size: 12.5px; color: #4b5563; text-decoration: none; display: block; margin-top: 2px;">
+            ${currentData.phoneNumber}
+          </a>`;
+      }
+
+      // Final Email Signature Table
+      const signatureHtml = `
   <table cellpadding="0" cellspacing="0" border="0"
-    style="font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%); border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    style="font-family: 'Segoe UI', Arial, sans-serif; ${bgStyle} border: 1px solid #e5e7eb; border-radius: 16px; padding: 10px 20px; padding-right: 10px; width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
     <tr>
-
-      <!-- 1. Left Vertical Social Icons Pill -->
-      <td valign="middle" style="padding-right: 16px;">
-        <table cellpadding="0" cellspacing="0" border="0"
-          style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 30px; padding: 10px 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
-          <tr>
-            <td align="center" style="padding-bottom: 10px;">
-              <a href="https://modhamanish.github.io/info" target="_blank" style="text-decoration: none;">
-                <img src="https://cdn-icons-png.flaticon.com/512/1006/1006771.png" width="14" height="14" alt="Web"
-                  style="display: block; opacity: 0.75;">
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" style="padding-bottom: 10px;">
-              <a href="https://www.instagram.com/manishmodha" target="_blank" style="text-decoration: none;">
-                <img src="https://cdn-icons-png.flaticon.com/512/1384/1384063.png" width="14" height="14" alt="IG"
-                  style="display: block; opacity: 0.75;">
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" style="padding-bottom: 10px;">
-              <a href="https://www.linkedin.com/in/modha-manish0969" target="_blank" style="text-decoration: none;">
-                <img src="https://cdn-icons-png.flaticon.com/512/3536/3536505.png" width="14" height="14" alt="IN"
-                  style="display: block; opacity: 0.75;">
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td align="center">
-              <a href="https://github.com/modhamanish" target="_blank" style="text-decoration: none;">
-                <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png" width="14" height="14" alt="GitHub"
-                  style="display: block; opacity: 0.75;">
-              </a>
-            </td>
-          </tr>
-        </table>
-      </td>
-
-      <!-- 2. Middle Info Section (Logo, Name, Role, Contact) -->
+      ${socialPillHtml}
       <td valign="middle" style="padding-right: 15px; width: 230px;">
-
-        <!-- Name + Verified Blue Badge -->
         <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 2px;">
           <tr>
             <td valign="middle" style="font-size: 20px; font-weight: 700; color: #111827; padding-right: 5px;">
-              Manish Modha
+              ${currentData.fullName}
             </td>
-            <td valign="middle">
-              <img src="https://cdn-icons-png.flaticon.com/512/7641/7641727.png" width="15" height="15" alt="Verified"
-                style="display: block;">
-            </td>
+            ${badgeHtml}
           </tr>
         </table>
-
-        <!-- Job Title -->
-        <div style="font-size: 13px; color: #6b7280; margin-bottom: 10px; font-weight: 500;">
-          Sr. Software Developer
-        </div>
-
+        ${jobHtml}
         <div style="font-size: 13px; line-height: 1.5;">
-          <a href="mailto:mr.manishmodha@gmail.com"
-            style="color: #4b5563; text-decoration: none; display: block;">mr.manishmodha@gmail.com</a>
-          <a href="tel:+919974306701" target="_blank"
-            style="font-size: 12.5px; color: #4b5563; text-decoration: none; display: block;">+91
-            99743 06701</a>
+          ${contactHtml}
         </div>
-
       </td>
-
-      <!-- 3. Right Animated Profile Image -->
       <td valign="middle" align="right">
-        <!-- NOTE: Niche src="..." mein apni Animated GIF image ka link daalein -->
-        <img
-          src="https://raw.githubusercontent.com/modhamanish/modhamanish/refs/heads/main/assets/liquid-profile-blob-300x300.gif"
-          width="125" height="125" alt="Profile" style="display: block; border-radius: 12px; object-fit: cover;">
+        <img src="${currentData.avatarUrl}" width="125" height="125" alt="Profile"
+          style="display: block; border-radius: ${currentData.avatarCorner}; object-fit: cover; border: 0;">
       </td>
-
     </tr>
-  </table>
-  <!-- SIGNATURE END -->
+  </table>`.trim();
 
+      signatureOutput.innerHTML = signatureHtml;
+    }
+
+    // Attach real-time input listeners
+    [
+      fullNameInput, jobTitleInput, showBadgeInput, emailAddrInput,
+      phoneNumberInput, websiteUrlInput, linkedinUrlInput, githubUrlInput,
+      instagramUrlInput, avatarUrlInput, avatarCornerInput, cardThemeInput
+    ].forEach(el => {
+      el.addEventListener('input', syncStateFromInputs);
+      el.addEventListener('change', syncStateFromInputs);
+    });
+
+    // Handle local image / GIF file upload
+    avatarFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      fileNameHint.textContent = `Selected: ${file.name}`;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        avatarUrlInput.value = ev.target.result;
+        syncStateFromInputs();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Show toast message
+    let toastTimeout;
+    function showNotification(msg) {
+      toastPill.innerHTML = `<span>${msg}</span>`;
+      toastPill.style.display = 'inline-flex';
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toastPill.style.display = 'none';
+      }, 4500);
+    }
+
+    // Copy rich signature (for Gmail, Outlook, Apple Mail)
+    async function copyRichSignature() {
+      const htmlContent = signatureOutput.innerHTML;
+      const textContent = signatureOutput.innerText;
+
+      let success = false;
+
+      // Method 1: Modern navigator.clipboard with ClipboardItem (HTML + PlainText)
+      if (navigator.clipboard && window.ClipboardItem) {
+        try {
+          const blobHtml = new Blob([htmlContent], { type: 'text/html' });
+          const blobText = new Blob([textContent], { type: 'text/plain' });
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'text/html': blobHtml,
+              'text/plain': blobText
+            })
+          ]);
+          success = true;
+        } catch (err) {
+          console.warn('ClipboardItem write failed, using selection fallback:', err);
+        }
+      }
+
+      // Method 2: DOM Selection range fallback (100% browser support)
+      if (!success) {
+        try {
+          const selection = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(signatureOutput);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          success = document.execCommand('copy');
+          selection.removeAllRanges();
+        } catch (err) {
+          console.error('execCommand copy failed:', err);
+        }
+      }
+
+      if (success) {
+        showNotification('✅ Signature copied! Now go to Gmail Settings > Signature and press Ctrl+V / Cmd+V.');
+      } else {
+        showNotification('❌ Could not copy automatically. Please select the signature and press Ctrl+C / Cmd+C.');
+      }
+    }
+
+    // Copy raw HTML code
+    async function copyHtmlCode() {
+      const htmlContent = signatureOutput.innerHTML;
+      try {
+        await navigator.clipboard.writeText(htmlContent);
+        showNotification('✅ Raw HTML code copied to clipboard!');
+      } catch (err) {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = htmlContent;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showNotification('✅ Raw HTML code copied to clipboard!');
+      }
+    }
+
+    // Reset to default
+    function resetForm() {
+      fullNameInput.value = DEFAULT_DATA.fullName;
+      jobTitleInput.value = DEFAULT_DATA.jobTitle;
+      showBadgeInput.checked = DEFAULT_DATA.showBadge;
+      emailAddrInput.value = DEFAULT_DATA.emailAddr;
+      phoneNumberInput.value = DEFAULT_DATA.phoneNumber;
+      websiteUrlInput.value = DEFAULT_DATA.websiteUrl;
+      linkedinUrlInput.value = DEFAULT_DATA.linkedinUrl;
+      githubUrlInput.value = DEFAULT_DATA.githubUrl;
+      instagramUrlInput.value = DEFAULT_DATA.instagramUrl;
+      avatarUrlInput.value = DEFAULT_DATA.avatarUrl;
+      avatarCornerInput.value = DEFAULT_DATA.avatarCorner;
+      cardThemeInput.value = DEFAULT_DATA.cardTheme;
+      fileNameHint.textContent = 'Supports Animated GIF & PNG';
+      avatarFileInput.value = '';
+
+      syncStateFromInputs();
+      showNotification('↺ Signature reset to defaults.');
+    }
+
+    // Event listeners
+    copySignatureBtn.addEventListener('click', copyRichSignature);
+    copyHtmlBtn.addEventListener('click', copyHtmlCode);
+    resetBtn.addEventListener('click', resetForm);
+
+    // Initial render
+    syncStateFromInputs();
+  </script>
 </body>
-
 </html>
